@@ -6,6 +6,11 @@
 </div>
 
 <div class="container">
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-10 d-flex justify-content-end">
+            <a href="{{route('product.index')}}" class="btn btn-primary">Back</a>
+        </div>
+    </div>
     <div class="row d-flex justify-content-center">
         <div class="col-md-10">
             <div class="card border-0 shadow-lg my-5">
@@ -57,9 +62,7 @@
                             <label class="form-label fw-semibold" for="file">Image:</label><br>
                             <input type="file" accept="image/*" class="form-control @error('name') is-invalid @enderror" id="file"
                                 placeholder="Attach Photo" name="image-box">
-                            @error('image-box')
-                            <p class="invalid-feedback " role="alert">{{ $message }}</p>
-                            @enderror
+
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn-lg btn btn-primary">Submit</button>
