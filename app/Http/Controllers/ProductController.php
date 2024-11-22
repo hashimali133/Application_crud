@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductStoreRequest;
-use App\Models\product;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\File;
+
 
 
 class ProductController extends Controller
@@ -15,8 +17,8 @@ class ProductController extends Controller
     //this method will display product
     public function index(): view
     {
-        $products = product::orderby('created_at', 'asc')->get();
-        return view('product.list', ['product' => $products]);
+        $product = product::orderby('created_at', 'asc')->get();
+        return view('product.list', ['products' => $product]);
     }
     public function create()
     {
@@ -25,18 +27,17 @@ class ProductController extends Controller
 
     public function store(ProductStoreRequest $request): RedirectResponse
     {
-        if ($request->image != "") {
-            $rules['image'] = 'image';
-            // $imageName = time() . '.' . $request->image->getClientOriginalExtension();
-            // $request->image->move(public_path('images'), $imageName);
-        }
-        $validator = Validator::make($request);
-        if ($validator->fails()) {
-            return redirect('/product/index')->withErrors($validator)->withInput();
-        }
 
+
+
+
+        $validator = Validator::make($request->all());
+
+        if ($validator->fails()) {
+            return redirect()->route('students.create')->withInput()->withErrors($validator);
+        }
         #here we will store the data in the DB
-        $products = new product();
+        $products = new Product();
         $products->name = $request->name;
         $products->sku = $request->sku;
         $products->quantity = $request->quantity;
@@ -44,13 +45,27 @@ class ProductController extends Controller
         $products->description = $request->description;
         $products->save();
 
-        #here we should store the product images
-        $image = $request->image;
-        $text = $image->getClientOriginalExtension();
-        $imageName = time() . "-" . $text;
-        $image->move(public_path('public/assets/images'));
-        $products->image = $imageName;
+        //store file to database
+        $image = $request->file('image');
+        $imageName = $image->getClientOriginalName();
+        $path = $request->image->storeAs('images', $imageName, 'public');
+        $products->image = $path;
         $products->save();
+
+
+
+        #here we should store the product images
+        // if ($request->image != "") {
+        //     //here we will store image to db
+        //     $image = $request->image;
+        //     $ext = $image->getClientOriginalExtension();
+        //     $imageName = time() . '.' . $ext;
+
+        //     $image->move(public_path('uploads/images'), $imageName);
+
+        //     $products->image = $imageName;
+        //     $products->save();
+        // }
 
         return redirect()->route('product.index')->with('success', 'products added successfully');
     }

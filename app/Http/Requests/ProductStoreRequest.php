@@ -21,11 +21,12 @@ class ProductStoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        return  $rules = [
+        return  [
             'name' => 'required|min:3',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:100',
             'quantity' => 'required|numeric|min:0',
             'sku' => 'required|numeric',
+            'image' => 'required|mimes:jpg,png,webp,jpeg|max:5000'
 
         ];
     }
