@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -17,7 +20,7 @@ class ProductController extends Controller
     //this method will display product
     public function index(): view
     {
-        $product = product::orderby('created_at', 'asc')->get();
+        $product = Product::orderby('created_at', 'asc')->get();
         return view('product.list', ['products' => $product]);
     }
     public function create()
@@ -28,49 +31,65 @@ class ProductController extends Controller
     public function store(ProductStoreRequest $request): RedirectResponse
     {
 
+        $product = Product::create($request->validated());
 
-
-
-        $validator = Validator::make($request->all());
-
-        if ($validator->fails()) {
-            return redirect()->route('students.create')->withInput()->withErrors($validator);
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images', $imageName, 'public');
+            $product->image = $path;
+            $product->save(); // Update the product record with the image path
         }
-        #here we will store the data in the DB
-        $products = new Product();
-        $products->name = $request->name;
-        $products->sku = $request->sku;
-        $products->quantity = $request->quantity;
-        $products->price = $request->price;
-        $products->description = $request->description;
-        $products->save();
-
-        //store file to database
-        $image = $request->file('image');
-        $imageName = $image->getClientOriginalName();
-        $path = $request->image->storeAs('images', $imageName, 'public');
-        $products->image = $path;
-        $products->save();
-
-
-
-        #here we should store the product images
-        // if ($request->image != "") {
-        //     //here we will store image to db
-        //     $image = $request->image;
-        //     $ext = $image->getClientOriginalExtension();
-        //     $imageName = time() . '.' . $ext;
-
-        //     $image->move(public_path('uploads/images'), $imageName);
-
-        //     $products->image = $imageName;
-        //     $products->save();
-        // }
-
-        return redirect()->route('product.index')->with('success', 'products added successfully');
+        return redirect()->route('product.index')->with('success', 'Product added successfully!');
     }
-    public function show($id) {}
-    public function edit($id) {}
-    public function update(Request $request, $id) {}
-    public function destroy($id) {}
+
+    // public function show($id) {}
+    public function edit($id)
+    {
+        $product = Product::findOrFail($id);
+        return view('product.edit', [
+            'product' => $product
+        ]);
+    }
+    //Public function for Update Product Record
+    public function update(ProductUpdateRequest $request, Product $product): RedirectResponse
+    {
+        $product->update($request->validated());
+        if ($request->image != "") {
+
+            // If a new image is uploaded, delete the old one
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images', $imageName, 'public');
+            $product->image = $path;
+        }
+        $product->save(); // Update the product record with the image path
+        return redirect()->route('product.index')->with('success', 'Product Updated successfully!');
+    }
+
+
+    #Public function for Delelted product record
+
+    public function destroy(Product $product) // Route Model Binding
+    {
+        try {
+            // Delete the associated image if it exists
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            // Delete the student record from the database
+            $product->delete();
+
+            return redirect()->route('product.index')->with('success', 'Student record deleted successfully!');
+        } catch (\Exception $e) {
+            // Handle errors gracefully
+            return redirect()->route('product.index')->with('error', 'Failed to delete student record. Please try again.');
+        }
+    }
 }
