@@ -12,8 +12,8 @@
                 </div>
                 <form action="{{ route('product.update', $product->id) }}" method="POST" class="form p-3" id="form-crud"
                     name="myForm" enctype="multipart/form-data">
-                    @csrf
                     @method('PUT')
+                    @csrf
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="name" class="form-label fw-semibold">Name</label>
@@ -59,11 +59,12 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold" for="file">Image:</label><br>
                             <input type="file" accept="image/*" class="form-control @error('name') is-invalid @enderror"
-                                id="file" placeholder="Attach Photo" name="image">
-                            @if ($product->image != '')
-                                <img width="80" src="{{ asset('/storage/' . $product->image) }}" alt="image">
-                            @endif
-
+                                id="file" placeholder="Attach Photo" name="image"
+                                onchange="document.querySelector('#output').src=window.URL.createObjectURL(this.files[0])">
+                            <div class="py-3">
+                                <img id="output" class="img-fluid" width="150"
+                                    src="{{ asset('/storage/' . $product->image) }}" alt="image">
+                            </div>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn-lg btn btn-primary">Update</button>

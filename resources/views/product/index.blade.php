@@ -23,7 +23,7 @@
                             <div class="mb-3">
                                 <label for="name" class="form-label fw-semibold">Name</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    placeholder="Enter Your Name" id="name" name="name"
+                                    placeholder="Enter Your Name" id="name" name="name" value="{{ old('name') }}"
                                     aria-describedby="full-name">
                                 @error('name')
                                     <p class="invalid-feedback" role="alert">{{ $message }}</p>
@@ -32,7 +32,8 @@
                             <div class="mb-3">
                                 <label for="sku" class="form-label fw-semibold">SKU:</label>
                                 <input type="text" class="form-control @error('sku') is-invalid @enderror"
-                                    placeholder="SKU" id="sku" aria-describedby="sku" name="sku">
+                                    placeholder="SKU" id="sku" aria-describedby="sku" name="sku"
+                                    value="{{ old('sku') }}">
                                 @error('sku')
                                     <p class="invalid-feedback" role="alert">{{ $message }}</p>
                                 @enderror
@@ -41,7 +42,7 @@
                                 <label for="quantity" class="form-label fw-semibold">Quantity:</label>
                                 <input type="number" class="form-control @error('quantity') is-invalid @enderror"
                                     placeholder="Quantity" id="quantity" autocomplete="cc-number" aria-describedby="qty"
-                                    name="quantity">
+                                    name="quantity" value="{{ old('quantity') }}">
                                 @error('quantity')
                                     <p class="invalid-feedback " role="alert">{{ $message }}</p>
                                 @enderror
@@ -49,7 +50,8 @@
                             <div class="mb-3">
                                 <label for="price" class="form-label fw-semibold">Price:</label>
                                 <input type="number" class="form-control @error('price') is-invalid @enderror"
-                                    placeholder="Price" id="price" aria-describedby="price" name="price">
+                                    placeholder="Price" id="price" aria-describedby="price" name="price"
+                                    value="{{ old('price') }}">
                                 @error('price')
                                     <p class="invalid-feedback " role="alert">{{ $message }}</p>
                                 @enderror
@@ -57,7 +59,7 @@
                             <div class="mb-3">
                                 <label for="description" class="form-label fw-semibold">Description:</label>
                                 <textarea type="password" class="form-control " placeholder="Leave Your Message" id="description" cols="39"
-                                    rows="3"></textarea>
+                                    rows="3">{{ old('description') }}</textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold" for="file">Image:</label><br>

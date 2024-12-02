@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
-
 
 
 class ProductController extends Controller
@@ -35,8 +30,7 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('images', $imageName, 'public');
+            $path = $request->image->store('images', 'public');
             $product->image = $path;
             $product->save(); // Update the product record with the image path
         }
@@ -52,25 +46,31 @@ class ProductController extends Controller
         ]);
     }
     //Public function for Update Product Record
-    public function update(ProductUpdateRequest $request, Product $product): RedirectResponse
+    public function update(ProductUpdateRequest $request, $id): RedirectResponse
     {
-        $product->update($request->validated());
-        if ($request->image != "") {
 
-            // If a new image is uploaded, delete the old one
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+        $product = Product::findOrFail($id);
+
+        if ($request->hasFile('image')) {
+
+            $img_path = public_path('storage/') . $product->image;
+            // Delete old image if it exists
+            if (file_exists($img_path)) {
+                @unlink($img_path);
             }
-
-
+            $product->update($request->validated());
+            // Store new image
             $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('images', $imageName, 'public');
+            $path = $image->store('images', 'public');
             $product->image = $path;
+
+            $product->save();
+            // Save product with new image path
         }
-        $product->save(); // Update the product record with the image path
+
         return redirect()->route('product.index')->with('success', 'Product Updated successfully!');
     }
+
 
 
     #Public function for Delelted product record
@@ -82,7 +82,6 @@ class ProductController extends Controller
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }
-
             // Delete the student record from the database
             $product->delete();
 

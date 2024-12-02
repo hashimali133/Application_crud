@@ -31,7 +31,8 @@
                                 <th scope="col">Name:</th>
                                 <th scope="col">Quantity</th>
                                 <th scope="col">Price</th>
-                                <th scope="col">sku</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Created at</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -42,7 +43,7 @@
                                         <th scope="row">{{ $product->id }}</th>
                                         <td>
                                             @if ($product->image != '')
-                                                <img src="{{ asset('/storage/' . $product->image) }}" width="80"
+                                                <img src="{{ asset('/storage/' . $product->image) }}" width="99"
                                                     alt="Image">
                                                 <!-- dd({{ $product->image }}) -->
                                             @endif
@@ -51,6 +52,7 @@
                                         <td>{{ $product->quantity }}</td>
                                         <td>{{ $product->price }}</td>
                                         <td>{{ $product->sku }}</td>
+                                        <td>{{ \carbon\carbon::parse($product->created_at)->format('d-M-Y') }}</td>
                                         <td>
 
                                             <form action="{{ route('product.destroy', $product->id) }}"
